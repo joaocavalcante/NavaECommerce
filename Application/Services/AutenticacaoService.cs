@@ -1,14 +1,13 @@
-﻿using Application.Interfaces;
+﻿using Application.DTOs;
+using Application.Interfaces;
 using Domain.Entities;
 using Domain.Exceptions;
-using Microsoft.IdentityModel.Tokens;
+using Domain.Enums;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace Application.Services
 {
-    public class AutenticacaoService
+    public class AutenticacaoService : IAutenticacaoService
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly string _jwtSecret;
@@ -32,27 +31,60 @@ namespace Application.Services
             return GerarToken(usuario);
         }
 
+        public async Task RegistrarAsync(RegistroDto dto)
+        {
+            // Validação básica
+            if (string.IsNullOrWhiteSpace(dto.Nome))
+                throw new DomainException("O nome é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                throw new DomainException("O email é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(dto.Senha))
+                throw new DomainException("A senha é obrigatória.");
+
+            // Verificar se o email já está em uso
+            var usuarioExistente = await _usuarioRepository.ObterPorEmailAsync(dto.Email);
+            if (usuarioExistente != null)
+                throw new DomainException("O email já está em uso.");
+
+            // Hash da senha
+            string senhaHash = HashSenha(dto.Senha);
+
+            // Criar nova entidade Usuario
+            var novoUsuario = new Usuario(dto.Nome, dto.Email, senhaHash, Role.Administrador);
+
+            // Adicionar ao repositório
+            await _usuarioRepository.AdicionarAsync(novoUsuario);
+        }
+
         private bool VerificarSenha(string senha, string senhaHash)
         {
-            // Implementar verificação de hash (ex: BCrypt)
-            // Aqui é simplificado para fins de exemplo
-            return senha == senhaHash;
+            return BCrypt.Net.BCrypt.Verify(senha, senhaHash);
+        }
+
+        private string HashSenha(string senha)
+        {
+            // Gera um hash seguro para a senha usando BCrypt
+            return BCrypt.Net.BCrypt.HashPassword(senha);
         }
 
         private string GerarToken(Usuario usuario)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSecret);
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var key = System.Text.Encoding.ASCII.GetBytes(_jwtSecret);
+            var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
+                Subject = new System.Security.Claims.ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                    new Claim(ClaimTypes.Email, usuario.Email),
-                    new Claim(ClaimTypes.Role, usuario.Role.ToString())
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, usuario.Email),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, usuario.Role.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddHours(_jwtLifespan),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                    new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                    Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);

@@ -16,8 +16,14 @@ namespace Infrastructure.Repositories
 
         public async Task AdicionarAsync(Usuario usuario)
         {
-            await _context.Usuarios.AddAsync(usuario);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.Usuarios.AddAsync(usuario);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         public async Task<Usuario> ObterPorEmailAsync(string email)

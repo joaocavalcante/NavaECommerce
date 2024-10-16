@@ -11,7 +11,7 @@ namespace Infrastructure.EntityConfiguration
             builder.HasKey(x => x.Id);
             builder.Property(m => m.Nome).HasMaxLength(50).IsRequired();
             builder.Property(m => m.Email).HasMaxLength(100).IsRequired();
-            builder.Property(m => m.SenhaHash).HasMaxLength(20).IsRequired();
+            builder.Property(m => m.SenhaHash).HasMaxLength(100).IsRequired();
             builder.Property(m => m.Role).IsRequired();
         }
     }

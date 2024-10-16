@@ -1,4 +1,6 @@
-﻿using Application.Services;
+﻿using Application.DTOs;
+using Application.Interfaces;
+using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.API.Controllers
@@ -7,9 +9,9 @@ namespace Presentation.API.Controllers
     [Route("api/[controller]")]
     public class AutenticacaoController : ControllerBase
     {
-        private readonly AutenticacaoService _autenticacaoService;
+        private readonly IAutenticacaoService _autenticacaoService;
 
-        public AutenticacaoController(AutenticacaoService autenticacaoService)
+        public AutenticacaoController(IAutenticacaoService autenticacaoService)
         {
             _autenticacaoService = autenticacaoService;
         }
@@ -25,21 +27,14 @@ namespace Presentation.API.Controllers
         [HttpPost("registro")]
         public async Task<IActionResult> Registro([FromBody] RegistroDto dto)
         {
-            // Implementar lógica de registro
-            return Ok();
+            await _autenticacaoService.RegistrarAsync(dto);
+            return Ok(new { Mensagem = "Usuário registrado com sucesso." });
         }
     }
 
     // DTOs
     public class LoginDto
     {
-        public string Email { get; set; }
-        public string Senha { get; set; }
-    }
-
-    public class RegistroDto
-    {
-        public string Nome { get; set; }
         public string Email { get; set; }
         public string Senha { get; set; }
     }
