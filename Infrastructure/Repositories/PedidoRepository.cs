@@ -37,8 +37,14 @@ namespace Infrastructure.Repositories
 
         public async Task AtualizarAsync(Pedido pedido)
         {
-            _context.Pedidos.Update(pedido);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Pedidos.Update(pedido);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+            }
         }
     }
 }

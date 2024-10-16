@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.Interfaces;
+using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,9 @@ namespace Presentation.API.Controllers
     [AllowAnonymous]
     public class OfertasController : ControllerBase
     {
-        private readonly OfertaService _ofertaService;
+        private readonly IOfertaService _ofertaService;
 
-        public OfertasController(OfertaService ofertaService)
+        public OfertasController(IOfertaService ofertaService)
         {
             _ofertaService = ofertaService;
         }
