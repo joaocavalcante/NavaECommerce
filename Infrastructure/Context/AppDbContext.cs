@@ -1,7 +1,8 @@
 ﻿using Domain.Entities;
+using Infrastructure.EntityConfiguration;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Data
+namespace Infrastructure.Context
 {
     public class AppDbContext : DbContext
     {
@@ -19,8 +20,12 @@ namespace Infrastructure.Data
         // Configurações adicionais
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            // Configurações de entidades
+            modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
+            modelBuilder.ApplyConfiguration(new ProdutoConfiguration());
+            modelBuilder.ApplyConfiguration(new PedidoConfiguration());
+            modelBuilder.ApplyConfiguration(new PagamentoConfiguration());
+            modelBuilder.ApplyConfiguration(new OfertaConfiguration());
+            modelBuilder.ApplyConfiguration(new ItemPedidoConfiguration());
         }
     }
 }

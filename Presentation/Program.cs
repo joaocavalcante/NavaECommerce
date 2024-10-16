@@ -1,6 +1,7 @@
+// Presentation/Program.cs
 using Application.Interfaces;
 using Application.Services;
-using Infrastructure.Data;
+using Infrastructure.Context;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,21 +20,27 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Registrar repositórios e serviços
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<AutenticacaoService>(provider =>
-{
-    var repo = provider.GetRequiredService<IUsuarioRepository>();
-    var jwtSecret = builder.Configuration["Jwt:Secret"];
-    var jwtLifespan = int.Parse(builder.Configuration["Jwt:Lifespan"]);
-    return new AutenticacaoService(repo, jwtSecret, jwtLifespan);
-});
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
+builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
+builder.Services.AddScoped<IOfertaRepository, OfertaRepository>();
 
-// Registrar OfertaService e HostedService
-builder.Services.AddScoped<OfertaService>();
-builder.Services.AddScoped<IOfertaRepository, OfertaRepository>(); // Certifique-se de ter implementado OfertaRepository
+builder.Services.AddScoped<IOfertaService, OfertaService>();
+builder.Services.AddScoped<ProdutoService>();
+builder.Services.AddScoped<PedidoService>();
+builder.Services.AddScoped<PagamentoService>();
+builder.Services.AddScoped<ConsultaPedidoService>();
+
+// Registrar Hosted Service
 builder.Services.AddHostedService<BlackFridayHostedService>();
 
 // Configurar autenticação JWT
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"]);
+var jwtSecret = builder.Configuration["Jwt:Secret"];
+if (string.IsNullOrEmpty(jwtSecret))
+{
+    throw new InvalidOperationException("JWT Secret is not configured.");
+}
+var key = Encoding.ASCII.GetBytes(jwtSecret);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

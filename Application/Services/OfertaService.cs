@@ -1,9 +1,10 @@
-﻿using Application.Interfaces;
+﻿// Application/Services/OfertaService.cs
+using Application.Interfaces;
 using Domain.Entities;
 
 namespace Application.Services
 {
-    public class OfertaService
+    public class OfertaService : IOfertaService
     {
         private readonly IOfertaRepository _ofertaRepository;
 

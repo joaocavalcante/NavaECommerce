@@ -1,9 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
-using Infrastructure.Data;
+using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
